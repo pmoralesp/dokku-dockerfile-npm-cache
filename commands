@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
+
+PLUGIN_BASE_PATH="$PLUGIN_PATH"
+if [[ -n $DOKKU_API_VERSION ]]; then
+  PLUGIN_BASE_PATH="$PLUGIN_ENABLED_PATH"
+fi
+source "$PLUGIN_BASE_PATH/common/functions"
+
+
+case "$1" in
+  npm-cache:set)
+    echo "NPM-CACHE" > "$DOKKU_ROOT/NPM-CACHE"
+    ;;
+
+  npm-cache:clear)
+    rm "$DOKKU_ROOT/NPM-CACHE"
+    ;;
+
+  redeploy:get)
+    cat "$DOKKU_ROOT/NPM-CACHE"
+    ;;
+
+  help)
+    HELP=$(cat<<EOF
+    npm-cache:set, Set npm-cache
+    npm-cache:clear, Clears npm-cache
+    npm-cache:get, Display npm-cache
+EOF
+)
+    if [[ -n $DOKKU_API_VERSION ]]; then
+      echo "$HELP"
+    else
+      cat && echo "$HELP"
+    fi
+    ;;
+
+  *)
+    exit $DOKKU_NOT_IMPLEMENTED_EXIT
+    ;;
+esac
