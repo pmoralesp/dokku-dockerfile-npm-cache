@@ -17,7 +17,7 @@ case "$1" in
     rm "$DOKKU_ROOT/NPM-CACHE"
     ;;
 
-  redeploy:get)
+  npm-cache:get)
     cat "$DOKKU_ROOT/NPM-CACHE"
     ;;
 
