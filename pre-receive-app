@@ -7,8 +7,11 @@ if [[ -f "$DOKKU_ROOT/NPM-CACHE" ]]; then
 	if [ "$IMAGE_SOURCE_TYPE" == "dockerfile" ]; then
   		echo "-----> Parsing Dockefile ..."
   		jq .dependencies package.json | tail -n +2 | head -n -1 | awk -F'"' '{ print $2"@"$4 }' | sed -e 's/^/RUN npm install /' > dependencies.txt
+  		jq .devDependencies package.json | tail -n +2 | head -n -1 | awk -F'"' '{ print $2"@"$4 }' | sed -e 's/^/RUN npm install /' >> dependencies.txt
 		sed -i '/COPY package.json/d' Dockerfile
-		perl -pe 's/RUN npm install\n/`cat dependencies.txt`/ge' -i Dockerfile
+		sort dependencies.txt > sort.txt
+		perl -pe 's/RUN npm install\n/`cat sort.txt`/ge' -i Dockerfile
+		rm dependencies.txt sort.txt
 		echo "-----> Parsing: OK"
   	fi
 fi
