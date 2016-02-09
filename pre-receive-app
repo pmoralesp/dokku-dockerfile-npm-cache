@@ -3,11 +3,13 @@ set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
 
 APP="$1"; IMAGE_SOURCE_TYPE="$2"; TMP_WORK_DIR="$3"; REV="$4"
 
-echo "Pre receive app NPM-CACHE"
-
 if [[ -f "$DOKKU_ROOT/NPM-CACHE" ]]; then
-	if [[ "$IMAGE_SOURCE_TYPE" == "dockerfile"]]; then
+	if [ "$IMAGE_SOURCE_TYPE" == "dockerfile" ]; then
   		echo "-----> Parsing Dockefile ..."
-  		cat Dockerfile
+  		jq .dependencies package.json | tail -n +2 | head -n -1 | awk -F'"' '{ print $2"@"$4 }' | sed -e 's/^/RUN npm install /' > dependencies.txt
+		sed -i '/COPY package.json/d' Dockerfile
+		perl -pe 's/RUN npm install\n/`cat dependencies.txt`/ge' -i Dockerfile
+		echo "-----> Parsing: OK"
   	fi
 fi
+
